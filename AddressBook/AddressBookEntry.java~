@@ -1,0 +1,12 @@
+class AddressBookEntry {
+  
+  private String name;
+  private String emailAddress;
+  private String phoneNumber;
+  
+  public AddressBookEntry(){
+  
+  
+  }
+  
+}
