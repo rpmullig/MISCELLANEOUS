@@ -15,88 +15,83 @@ UserLayer: {
     shape: class
     style.fill: "#9575cd"
     + Picks up ImageRight tasks (FIFO Queue)
-    + Extracts fields manually from documents
-    + Creates WWIP submission record
-    + Initiates reservation in eStart
-    + Links WWIP ID to ImageRight Drawer
-    + Updates pre-indication fields
-    + Clears blocks if necessary
+    + Manually splits files and tags types
+    + Extracts submission fields for reservation
+    + Creates WWIP submission and gets WWIP ID
+    + Reserves in eStart and gets eStart ID \& clearance status
+    + Updates WWIP with eStart info
+    + Manually overwrites temp ImageRight ID with WWIP ID
   }
 
   Underwriter: "Underwriter (UW)" {
     shape: class
     style.fill: "#9575cd"
-    + Reviews parsed broker submissions
-    + Conducts embedded and manual research
-    + Initiates modeling in GLMS or WWIP
-    + Finalizes quoting, binder packaging
-    + Creates UW Notes and Referral Requests
-    + Sends indications and final quotes to broker
+    + Reviews submission materials via WWIP / ImageRight
+    + Conducts embedded and external research
+    + Decides on GLMS vs WWIP modeling
+    + Creates referral, UW notes, selects quote structure
+    + Sends indications and final quotes
   }
 
   COE: "Center of Excellence (COE)" {
     shape: class
     style.fill: "#9575cd"
     + Scrubs and standardizes SOV files
-    + Uploads modeling scenarios into GLMS
-    + Returns modeled outputs to UW
+    + Uploads modeling scenarios to GLMS
+    + Returns CAT output summaries to UW
   }
 }
 
-# ---------- SERVICES (UNGROUPED) ----------
+# ---------- SERVICES ----------
 
-ImageRight: "ImageRight (Email Intake + Doc Management)" {
+ImageRight: "ImageRight (Email Intake + Doc Mgmt)" {
   shape: class
   style.fill: "#4dd0e1"
-  + Sweeps broker submission emails
-  + Parses attachments into separate viewable documents
-  + Creates temporary ImageRight Drawer and Temporary ID
-  + Displays email and attachments as separate pages in Viewer
-  + Creates SSC Task Queue (FIFO)
-  + Stores broker documents with metadata (Broker Name, Class, Status)
-  + Allows manual tagging and file splitting
-  + Final Drawer ID overwritten manually with WWIP ID / Policy Number
-  + URL linking from WWIP to ImageRight Drawer via Policy ID
-  + Accepts document pushes from WWIP (Linker\.exe)
+  + Sweeps submission inbox (Standard, VIP, Rush)
+  + Parses attachments and creates viewable components
+  + Creates temporary Drawer and ID
+  + Enables SSC to split files, tag SOV, Loss Runs
+  + Creates task in queue for SSC
+  + Drawer overwritten by WWIP Policy ID
+  + URL to Drawer generated from WWIP Policy #
+  + Accepts one-way doc push from WWIP via Linker\.exe
 }
 
 eStart: "eStart / NGE" {
   shape: class
   style.fill: "#ffb74d"
-  + Receives reservation data from SSC
-  + Performs duplicate, sanction, legal risk checks
-  + Generates unique eStart ID
-  + Issues Clearance Status (Pass, Blocked, Pending)
-  + Allows manual shell account creation if no match found
+  + Accepts reservation from SSC
+  + Performs block checks (duplicate, sanction)
+  + Issues eStart ID and clearance status
+  + Sends results to WWIP for status update
+  + Allows shell record if account not found
 }
 
 WWIP: "WWIP (Submission Management Platform)" {
   shape: class
   style.fill: "#64b5f6"
-  + Creates official submission record with WWIP ID / Policy Number
-  + Stores eStart ID and Clearance Status from eStart
-  + Tracks submission statuses (Reserved, Blocked, Solicited, Renewed, Bound)
-  + Pre-fills Crime Score, Brush Score, Distance to Coast
-  + Integrates Validus scoring post-geocode
-  + Allows UW Notes, Referral Tracking, Binder Generation
-  + Creates email communications (Quotes, Forms) from internal templates
-  + Supports drop-down selections for forms, deductibles, endorsements
-  + Auto-generates attachments for Email Service
-  + Pushes documents to ImageRight (one-way via Linker\.exe)
-  + Provides embedded worksheet module for UW pricing
-  + Connects to ISO via Clarion Door for Protection Class / Symbols
-  + WWIP URL links to ImageRight Drawer location via Policy Number
+  + Creates WWIP ID / Policy Number for submission
+  + Stores submission metadata and referral records
+  + Accepts eStart ID + Clearance Status
+  + Tracks status: Reserved, Blocked, Solicited, Quoted
+  + Embeds worksheet module for pricing
+  + Auto-generates quotes, forms, binders
+  + Provides dropdowns for deductibles, endorsements
+  + Sends docs to ImageRight via Linker\.exe
+  + Links to ImageRight Drawer via WWIP ID
+  + Runs geocoding (embedded Google Maps)
+  + Calls Validus for Crime, Brush, DTC
+  + Retrieves ISO Protection Class via Clarion Door
 }
 
-GLMS: "GLMS (CAT Modeling Platform)" {
+GLMS: "GLMS (Modeling Platform)" {
   shape: class
   style.fill: "#7b9f35"
-  + Receives SOV and modeling scenarios from COE/UW
-  + Runs CAT models for Flood, EQ, Wind, Fire
-  + Submits scenarios to Lynx Orchestrator
-  + Returns blended results back to GLMS
-  + Sends outputs to AIGRater (HX) for technical premium generation
-  + Uploads scenario outputs into GDMS storage
+  + Accepts scenario inputs from UW or COE
+  + Prepares file output for Lynx (CAT integration)
+  + Re-ingests merged CAT results from Lynx
+  + Sends model data to AIGRater (HX) for pricing
+  + Uploads scenario outputs to GDMS
 }
 
 # ---------- RESEARCH LAYER ----------
@@ -112,38 +107,40 @@ ResearchLayer: {
     Validus: "Validus Risk Services" {
       shape: class
       style.fill: "#81c784"
-      + Provides ISO, Crime, Brush, Distance to Coast scoring
+      + Provides ISO, Crime, Brush, DTC scoring after geocode
     }
 
     WWIPGeocoder: "WWIP Embedded Google Maps" {
       shape: class
       style.fill: "#81c784"
-      + Converts address to lat/long for risk scoring
+      + Converts address into lat/long for Validus scoring
     }
 
     ClarionDoor: "Clarion Door (ISO Rating API)" {
       shape: class
       style.fill: "#f48fb1"
-      + Provides ISO Protection Class and Symbols
+      + Returns Protection Class, Fire Symbol for quoting
     }
 
     PlacelyGeo: "Placely Geoservices" {
       shape: class
       style.fill: "#f48fb1"
-      + Rooftop match validation and geo-coding accuracy
+      + Validates rooftop match for location accuracy
     }
 
-    Lynx: "Lynx CAT Engine" {
+    Lynx: "Lynx CAT Engine (File-based Orchestrator)" {
       shape: class
       style.fill: "#f48fb1"
-      + Aggregates RMS, AIR, Validus CAT results
-      + Returns consolidated outputs to GLMS
+      + Accepts CAT model files from GLMS
+      + Routes through RMS, AIR, Validus models
+      + Merges result and returns to GLMS
     }
 
-    AIGRater: "AIG Rating Service (HX)" {
+    AIGRater: "AIG Rater (HX)" {
       shape: class
       style.fill: "#f48fb1"
-      + Finalizes technical pricing for binding
+      + Accepts modeled data from GLMS
+      + Returns final technical premium
     }
   }
 
@@ -151,34 +148,34 @@ ResearchLayer: {
     label: "Manual External Research"
     style.fill: "#ede7f6"
 
-    GoogleMaps: "Google Maps (Manual Check)" {
+    GoogleMaps: "Google Maps (Manual Review)" {
       shape: class
       style.fill: "#aed581"
-      + Visual inspection of property and surroundings
+      + Visual property check for TIV, environment
     }
 
     CrimeSpot: "CrimeSpot / SpotCrime" {
       shape: class
       style.fill: "#aed581"
-      + Manual lookup of neighborhood crime overlays
+      + Manually lookup neighborhood crime heatmap
     }
 
     RiskMeter: "RiskMeter" {
       shape: class
       style.fill: "#aed581"
-      + Brushfire risk mapping and hazard scoring
+      + Wildfire, Wind risk scoring
     }
 
-    NewsWeb: "Public Search (Google, Yelp, News)" {
+    NewsWeb: "Public Sources (Google, Yelp, News)" {
       shape: class
       style.fill: "#aed581"
-      + Manual lookup of lawsuits, reputational risks
+      + Reputation checks, reviews, lawsuits
     }
 
-    UWGuidelines: "UW Guidelines (OneNote Playbooks)" {
+    UWGuidelines: "UW Guidelines (OneNote)" {
       shape: class
       style.fill: "#aed581"
-      + Reference point for appetite, escalation rules, modeling exceptions
+      + Judgment rules, escalation triggers, FAC rules
     }
   }
 }
@@ -189,68 +186,67 @@ DataLayer: {
   label: "Data Layer"
   style.fill: "#e8f5e9"
 
-  ImageRightDB: "ImageRight Storage" {
+  ImageRightDB: "ImageRight Archive" {
     shape: class
     style.fill: "#4fc3f7"
-    - Archives broker emails, parsed attachments
-    - Archives submission docs, binders, quote letters
-    - Tracks linkage to WWIP Policy Number
+    - Submission docs, SOVs, binders, email snapshots
+    - Organized by WWIP Policy ID
   }
 
-  WWIPDB: "WWIP SQL Database" {
+  WWIPDB: "WWIP SQL DB" {
     shape: class
     style.fill: "#4fc3f7"
-    - Stores submission lifecycle flags (Reserved, Blocked, Solicited, Renew)
-    - Tracks Quote History, Document Records, Referrals, Underwriter Notes
-    - Tracks attached doc classification and email communication logs
+    - Submission state, pre-indication fields
+    - Notes, Referrals, Document attachments
+    - Stores quote output and UW actions
   }
 
-  GDMS: "GDMS Scenario Storage" {
+  GDMS: "GDMS CAT Storage" {
     shape: class
     style.fill: "#4fc3f7"
-    - Holds scrubbed SOVs
-    - Archives CAT scenarios and modeled outputs
+    - Full modeling outputs
+    - Scenarios, limits, perils
   }
 }
 
-# ---------- FLOW (Realistic and Scoped) ----------
+# ---------- FLOW ----------
 
-UserLayer.Broker -> ImageRight: Submits email and attachments
-ImageRight -> UserLayer.SharedServices: Parses attachments and creates task queue
-UserLayer.SharedServices -> WWIP: Creates submission record with temporary Policy ID
-UserLayer.SharedServices -> eStart: Creates reservation and gets eStart ID \& Clearance Status
-eStart -> WWIP: Updates WWIP submission record with eStart ID and clearance status
-UserLayer.SharedServices -> ImageRight: Overwrites temporary ID with WWIP Policy ID for drawer linkage
+UserLayer.Broker -> ImageRight: Sends email submission and attachments
+ImageRight -> UserLayer.SharedServices: Parses files and creates task queue
+UserLayer.SharedServices -> WWIP: Creates submission record, receives WWIP ID
+UserLayer.SharedServices -> eStart: Runs reservation, gets eStart ID \& Clearance
+eStart -> WWIP: Updates record with eStart ID and block status
+UserLayer.SharedServices -> ImageRight: Overwrites Drawer ID with WWIP Policy Number
 
-WWIP -> UserLayer.SharedServices: Unlocks UW assignment path
-WWIP -> UserLayer.Underwriter: Sends assignment notification
+WWIP -> UserLayer.SharedServices: Submission ready for UW assignment
+WWIP -> UserLayer.Underwriter: Alerts UW
 
-UserLayer.Underwriter -> ImageRight: Accesses parsed documents via linked WWIP Policy ID
-WWIP -> ResearchLayer.Embedded.WWIPGeocoder: Geocodes address for risk scoring
-ResearchLayer.Embedded.WWIPGeocoder -> ResearchLayer.Embedded.Validus: Triggers ISO, Crime, Brush, DTC scoring
-WWIP -> ResearchLayer.Embedded.Validus: Receives populated risk scores
+UserLayer.Underwriter -> ImageRight: Reviews structured submission docs
+WWIP -> ResearchLayer.Embedded.WWIPGeocoder: Runs address to lat/long
+ResearchLayer.Embedded.WWIPGeocoder -> ResearchLayer.Embedded.Validus: Risk scoring triggered
+WWIP -> ResearchLayer.Embedded.Validus: Receives ISO, Brush, Crime scores
 
-UserLayer.Underwriter -> GLMS: Requests modeling handoff
-GLMS -> ResearchLayer.Embedded.Lynx: Submits to CAT orchestrator
-ResearchLayer.Embedded.Lynx -> GLMS: Returns blended RMS/AIR/Validus results
-GLMS -> ResearchLayer.Embedded.AIGRater: Sends CAT outputs for technical pricing
-ResearchLayer.Embedded.AIGRater -> UserLayer.Underwriter: Receives final premium guidance
+UserLayer.Underwriter -> GLMS: Sends modeling request
+GLMS -> ResearchLayer.Embedded.Lynx: Sends scenario file via cronjob
+ResearchLayer.Embedded.Lynx -> GLMS: Returns merged CAT results
+GLMS -> ResearchLayer.Embedded.AIGRater: Sends for rating
+ResearchLayer.Embedded.AIGRater -> UserLayer.Underwriter: Returns final technical premium
 
-GLMS -> ResearchLayer.Embedded.PlacelyGeo: Validates rooftop and geocoding alignment
+GLMS -> ResearchLayer.Embedded.PlacelyGeo: Validates location data
 
-UserLayer.Underwriter -> ResearchLayer.Manual.GoogleMaps: Conducts manual visual check
-UserLayer.Underwriter -> ResearchLayer.Manual.CrimeSpot: Checks crime overlay maps
-UserLayer.Underwriter -> ResearchLayer.Manual.RiskMeter: Verifies hazard scores
-UserLayer.Underwriter -> ResearchLayer.Manual.NewsWeb: Searches public sources
-UserLayer.Underwriter -> ResearchLayer.Manual.UWGuidelines: Consults internal UW Playbooks
+UserLayer.Underwriter -> ResearchLayer.Manual.GoogleMaps: Views site
+UserLayer.Underwriter -> ResearchLayer.Manual.CrimeSpot: Checks crime zone
+UserLayer.Underwriter -> ResearchLayer.Manual.RiskMeter: Manually compares hazard data
+UserLayer.Underwriter -> ResearchLayer.Manual.NewsWeb: Searches reputation
+UserLayer.Underwriter -> ResearchLayer.Manual.UWGuidelines: Checks OneNote playbook
 
-UserLayer.Underwriter -> WWIP: Finalizes pricing, completes quote forms, binds account
-WWIP -> ResearchLayer.Embedded.ClarionDoor: Retrieves ISO symbols for quote generation
-WWIP -> DataLayer.WWIPDB: Archives submission state changes, documents, notes
-WWIP -> DataLayer.ImageRightDB: Pushes finalized binder package
-GLMS -> DataLayer.GDMS: Archives full modeling outputs
+UserLayer.Underwriter -> WWIP: Completes quoting, binds submission
+WWIP -> ResearchLayer.Embedded.ClarionDoor: Pulls ISO class info
+WWIP -> DataLayer.WWIPDB: Saves final status, quote docs, and forms
+WWIP -> DataLayer.ImageRightDB: Pushes documents via Linker\\.exe
+GLMS -> DataLayer.GDMS: Archives final scenario files
 
-ImageRight -> DataLayer.ImageRightDB: Archives intake submission docs
+ImageRight -> DataLayer.ImageRightDB: Stores submission package
 
 # ---------- LEGEND ----------
 
