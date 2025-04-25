@@ -128,19 +128,22 @@ ResearchLayer: {
     Lynx: "Lynx CAT Integration (File-Based)" {
       shape: class
       style.fill: "#f48fb1"
+      + Accepts CAT scenario files from GLMS
+      + Routes files to RMS, AIR, and Validus CAT models
+      + Merges outputs and sends results back to GLMS
+    }
 
-      RMS: "RMS CAT Model" {
-        shape: class
-        style.fill: "#f48fb1"
-      }
-      AIR: "AIR CAT Model" {
-        shape: class
-        style.fill: "#f48fb1"
-      }
-      ValidusCAT: "Validus CAT Model" {
-        shape: class
-        style.fill: "#f48fb1"
-      }
+    RMS: "RMS CAT Model" {
+      shape: class
+      style.fill: "#f48fb1"
+    }
+    AIR: "AIR CAT Model" {
+      shape: class
+      style.fill: "#f48fb1"
+    }
+    ValidusCAT: "Validus CAT Model" {
+      shape: class
+      style.fill: "#f48fb1"
     }
 
     GLMSToolchain: "GLMS Toolchain (Scenario Processing)" {
@@ -222,6 +225,13 @@ DataLayer: {
     - Archives SOVs, scenario exports
     - Stores CAT merged outputs
   }
+
+  GDW: "GDW (Post-bind System of Record)" {
+    shape: class
+    style.fill: "#4fc3f7"
+    - Receives final price from iFeed
+    - Source of truth for bound records
+  }
 }
 
 # ---------- FLOW (Explicit Human Actions) ----------
@@ -243,17 +253,13 @@ WWIP -> ResearchLayer.Embedded.Validus: Receives risk data
 
 UserLayer.Underwriter -> GLMS: Sends modeling request
 GLMS -> ResearchLayer.Embedded.Lynx: Submits scenario file
-ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.RMS: Routes RMS model
-ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.AIR: Routes AIR model
-ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.ValidusCAT: Routes Validus model
-ResearchLayer.Embedded.RMS -> ResearchLayer.Embedded.Lynx: Returns RMS results
-ResearchLayer.Embedded.AIR -> ResearchLayer.Embedded.Lynx: Returns AIR results
-ResearchLayer.Embedded.ValidusCAT -> ResearchLayer.Embedded.Lynx: Returns Validus results
+ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.RMS
+ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.AIR
+ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.ValidusCAT
 ResearchLayer.Embedded.Lynx -> GLMS: Returns merged CAT output
 GLMS -> ResearchLayer.Embedded.GLMSToolchain: Scenario processed
 ResearchLayer.Embedded.GLMSToolchain -> ResearchLayer.Embedded.AIGRater: Final rating
 ResearchLayer.Embedded.AIGRater -> UserLayer.Underwriter: Returns Technical Premium
-
 GLMS -> ResearchLayer.Embedded.PlacelyGeo: Validates rooftop accuracy
 
 UserLayer.Underwriter -> ResearchLayer.Manual.GoogleMaps: Conducts aerial review
@@ -265,42 +271,7 @@ UserLayer.Underwriter -> ResearchLayer.Manual.UWGuidelines: Consults underwritin
 UserLayer.Underwriter -> WWIP: Finalizes quoting / binder generation
 WWIP -> ResearchLayer.Embedded.ClarionDoor: Fetches ISO class data
 WWIP -> DataLayer.WWIPDB: Saves final submission status and quote docs
-WWIP -> DataLayer.ImageRightDB: Pushes binder via Linker\\.exe
+WWIP -> DataLayer.ImageRightDB: Pushes binder via Linker\.exe
 GLMS -> DataLayer.GDMS: Archives CAT scenarios
 
 ImageRight -> DataLayer.ImageRightDB: Stores broker email and docs
-
-# ---------- LEGEND ----------
-
-Legend: "Legend" {
-  grid-rows: 2
-}
-
-Legend.User: {
-  shape: class
-  style.fill: "#9575cd"
-}
-Legend.ImageRight: {
-  shape: class
-  style.fill: "#4dd0e1"
-}
-Legend.eStart: {
-  shape: class
-  style.fill: "#ffb74d"
-}
-Legend.WWIP: {
-  shape: class
-  style.fill: "#64b5f6"
-}
-Legend.GLMS: {
-  shape: class
-  style.fill: "#7b9f35"
-}
-Legend.Storage: {
-  shape: class
-  style.fill: "#4fc3f7"
-}
-Legend.Tools: {
-  shape: class
-  style.fill: "#f48fb1"
-}
