@@ -31,16 +31,19 @@ UserLayer: {
     + Reviews broker follow-up uploads
     + Conducts research via embedded and manual tools
     + Decides on modeling (WWIP or GLMS)
+    + Sends GLMS work request or email to COE with SOV
+    + Interacts with GLMS scenarios: selects coverages, fills fields
     + Finalizes quotes, binds account
   }
 
   COE: "Center of Excellence (COE)" {
     shape: class
     style.fill: "#9575cd"
-    + Receives handoff instructions from UW
-    + Cleans SOVs and creates modeling scenarios
-    + Inputs scenarios into GLMS
-    + Returns TVAR/AAL outputs to UW
+    + Receives SOV and work request from UW (email or GLMS portal)
+    + Runs Jarvis Excel pipeline to clean/parse locations
+    + Uploads cleaned locations into GLMS
+    + Supports building GLMS scenarios, layers, perils
+    + Returns TVAR/AAL outputs to UW for pricing
   }
 }
 
@@ -107,7 +110,7 @@ ResearchLayer: {
       + Provides ISO, Crime, Brush, DTC scoring
     }
 
-    WWIPGeocoder: "WWIP Embedded Maps" {
+    WWIPGeocoder: "WWIP Embedded Googles Maps" {
       shape: class
       style.fill: "#81c784"
       + Geocodes addresses to lat/long
@@ -115,7 +118,7 @@ ResearchLayer: {
 
     ClarionDoor: "Clarion Door (ISO Rating)" {
       shape: class
-      style.fill: "#f48fb1"
+      style.fill: "#81c784"
       + Returns Protection Class and ISO Symbol
     }
 
@@ -159,6 +162,12 @@ ResearchLayer: {
       style.fill: "#f48fb1"
       + Returns Technical Premium for quote
     }
+
+    UWGuidelines: "UW Guidelines (OneNote)" {
+      shape: class
+      style.fill: "#81c784"
+      + Manual judgment playbook for underwriters
+    }
   }
 
   Manual: {
@@ -188,11 +197,40 @@ ResearchLayer: {
       style.fill: "#aed581"
       + Lawsuit search, reputation validation
     }
+  }
 
-    UWGuidelines: "UW Guidelines (OneNote)" {
+  Augmented: {
+    label: "Augmented Research (via UWA)"
+    style.fill: "#90caf9"
+
+    AutoImageRight: "Automated Doc Preview (ImageRight)" {
       shape: class
-      style.fill: "#aed581"
-      + Manual judgment playbook for underwriters
+      style.fill: "#42a5f5"
+      + Pulls SoV, Loss Run, and documents for preview
+    }
+
+    AutoGoogle: "Google Aerial (SERP/Maps)" {
+      shape: class
+      style.fill: "#42a5f5"
+      + Retrieves aerial image snippets for locations
+    }
+
+    AutoRiskMeter: "Risk Scores (RiskMeter)" {
+      shape: class
+      style.fill: "#42a5f5"
+      + Provides brush, wind, hail, flood risk
+    }
+
+    AutoValidus: "Validus API (Crime/ISO)" {
+      shape: class
+      style.fill: "#42a5f5"
+      + Fetches ISO classification and crime score
+    }
+
+    AutoSearch: "Google Search (Company Info)" {
+      shape: class
+      style.fill: "#42a5f5"
+      + Searches business presence, news, Yelp data
     }
   }
 }
@@ -234,6 +272,21 @@ DataLayer: {
   }
 }
 
+UWA: "UWA Service Layer (GenAI)" {
+  shape: class
+  style.fill: "#fbc02d"
+  + Ingests broker submission from ImageRight
+  + Extracts key fields and coverage indicators
+  + Flags modeling path (GLMS or WWIP)
+  + Tags submission with bind propensity
+  + Pushes structured data to WWIP
+}
+
+# ---------- UWA FLOWS ----------
+ImageRight -> UWA: Sends parsed docs for ingestion
+UWA -> WWIP: Pushes extracted fields + prioritization tags
+UWA -> UserLayer.SharedServices: Pre-fills WWIP reservation form (SSC verifies)
+
 # ---------- FLOW (Explicit Human Actions) ----------
 
 UserLayer.Broker -> ImageRight: Submits email and attachments
@@ -251,27 +304,83 @@ WWIP -> ResearchLayer.Embedded.WWIPGeocoder: Geocodes address
 ResearchLayer.Embedded.WWIPGeocoder -> ResearchLayer.Embedded.Validus: Populates risk scores
 WWIP -> ResearchLayer.Embedded.Validus: Receives risk data
 
-UserLayer.Underwriter -> GLMS: Sends modeling request
+UserLayer.Underwriter -> UserLayer.COE: Sends SOV and modeling work request
+UserLayer.COE -> GLMS: Uploads scrubbed SOV + prepares scenarios
+UserLayer.Underwriter -> GLMS: Selects coverages, builds scenarios
+
 GLMS -> ResearchLayer.Embedded.Lynx: Submits scenario file
 ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.RMS
 ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.AIR
 ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.ValidusCAT
 ResearchLayer.Embedded.Lynx -> GLMS: Returns merged CAT output
+
 GLMS -> ResearchLayer.Embedded.GLMSToolchain: Scenario processed
 ResearchLayer.Embedded.GLMSToolchain -> ResearchLayer.Embedded.AIGRater: Final rating
 ResearchLayer.Embedded.AIGRater -> UserLayer.Underwriter: Returns Technical Premium
+
 GLMS -> ResearchLayer.Embedded.PlacelyGeo: Validates rooftop accuracy
 
 UserLayer.Underwriter -> ResearchLayer.Manual.GoogleMaps: Conducts aerial review
 UserLayer.Underwriter -> ResearchLayer.Manual.CrimeSpot: Manually checks crime area
 UserLayer.Underwriter -> ResearchLayer.Manual.RiskMeter: Compares wildfire scores
 UserLayer.Underwriter -> ResearchLayer.Manual.NewsWeb: Conducts public risk search
-UserLayer.Underwriter -> ResearchLayer.Manual.UWGuidelines: Consults underwriting rules
+UserLayer.Underwriter -> ResearchLayer.Embedded.UWGuidelines: Consults underwriting rules
 
 UserLayer.Underwriter -> WWIP: Finalizes quoting / binder generation
 WWIP -> ResearchLayer.Embedded.ClarionDoor: Fetches ISO class data
 WWIP -> DataLayer.WWIPDB: Saves final submission status and quote docs
 WWIP -> DataLayer.ImageRightDB: Pushes binder via Linker\.exe
 GLMS -> DataLayer.GDMS: Archives CAT scenarios
+WWIP -> DataLayer.GDW: Sends bound price via iFeed
 
 ImageRight -> DataLayer.ImageRightDB: Stores broker email and docs
+
+UWA: "UWA Service Layer (GenAI)" {
+  shape: class
+  style.fill: "#fbc02d"
+  + Parses broker emails from submission inbox
+  + Extracts and classifies all submission documents
+  + Runs field extraction (TIV, occupancy, locations)
+  + Validates completeness of submission
+  + Triggers NGE reservation via API
+  + Tags incomplete submissions for SSC queue
+  + Tags Fast Track eligible deals
+  + Sends deal data to UWConsole for review
+  + Prepares GLMS modeling handoff for CoE
+  + Ingests modeling results (AAL, TVAR, Premium)
+  + Sends draft indication templates (Fast Track)
+}
+
+UWConsole: "UWA UW Console" {
+  shape: class
+  style.fill: "#8e24aa"
+  + Displays all active submissions to UW
+  + Flags follow-ups, incomplete, Fast Track
+  + Searchable by Insured, ID, Date, Broker
+  + Shows submission summary: TIV, Occupancy, Limit
+  + Renders inline SoV, Loss History, Risk scores
+  + Supports triggering indication or GLMS handoff
+}
+
+PrioritizationEngine: "UWA Prioritization Engine" {
+  shape: class
+  style.fill: "#f9a825"
+  + Scores submissions by completeness, follow-up, appetite, effective date
+  + Tags Fast Track based on rules
+  + Ranks deals in queue for UWConsole
+}
+
+UWA -> eStart: Submits reservation with extracted fields
+UWA -> WWIP: Pre-fills form (if API available)
+UWA -> PrioritizationEngine
+PrioritizationEngine -> UWConsole
+UWA -> UWConsole: Sends metadata, documents, risk flags
+UWA -> UserLayer.SharedServices: Queues low-confidence docs for HITL
+UWConsole -> UserLayer.Underwriter: Review and decisioning
+UWConsole -> UWA: Triggers GLMS handoff or broker indication
+
+UWA -> ResearchLayer.Augmented.AutoImageRight: Pulls SoV, Loss Run for preview
+UWA -> ResearchLayer.Augmented.AutoGoogle: Retrieves aerial snip via Maps API
+UWA -> ResearchLayer.Augmented.AutoRiskMeter: Gets brush/wind/hail scores
+UWA -> ResearchLayer.Augmented.AutoValidus: Pulls ISO & crime ratings
+UWA -> ResearchLayer.Augmented.AutoSearch: Performs business info lookup
