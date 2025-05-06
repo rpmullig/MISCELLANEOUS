@@ -203,34 +203,10 @@ ResearchLayer: {
     label: "Augmented Research (via UWA)"
     style.fill: "#90caf9"
 
-    AutoImageRight: "Automated Doc Preview (ImageRight)" {
+    AutoSearch: "Google News and Search" {
       shape: class
       style.fill: "#42a5f5"
-      + Pulls SoV, Loss Run, and documents for preview
-    }
-
-    AutoGoogle: "Google Aerial (SERP/Maps)" {
-      shape: class
-      style.fill: "#42a5f5"
-      + Retrieves aerial image snippets for locations
-    }
-
-    AutoRiskMeter: "Risk Scores (RiskMeter)" {
-      shape: class
-      style.fill: "#42a5f5"
-      + Provides brush, wind, hail, flood risk
-    }
-
-    AutoValidus: "Validus API (Crime/ISO)" {
-      shape: class
-      style.fill: "#42a5f5"
-      + Fetches ISO classification and crime score
-    }
-
-    AutoSearch: "Google Search (Company Info)" {
-      shape: class
-      style.fill: "#42a5f5"
-      + Searches business presence, news, Yelp data
+      + Searches business presence, news, etc
     }
   }
 }
@@ -277,7 +253,7 @@ UWA: "UWA Service Layer (GenAI)" {
   style.fill: "#fbc02d"
   + Ingests broker submission from ImageRight
   + Extracts key fields and coverage indicators
-  + Flags modeling path (GLMS or WWIP)
+  + Flags modeling path as GLMS or WWIP
   + Tags submission with bind propensity
   + Pushes structured data to WWIP
 }
@@ -335,52 +311,54 @@ WWIP -> DataLayer.GDW: Sends bound price via iFeed
 
 ImageRight -> DataLayer.ImageRightDB: Stores broker email and docs
 
-UWA: "UWA Service Layer (GenAI)" {
-  shape: class
-  style.fill: "#fbc02d"
-  + Parses broker emails from submission inbox
-  + Extracts and classifies all submission documents
-  + Runs field extraction (TIV, occupancy, locations)
-  + Validates completeness of submission
-  + Triggers NGE reservation via API
-  + Tags incomplete submissions for SSC queue
-  + Tags Fast Track eligible deals
-  + Sends deal data to UWConsole for review
-  + Prepares GLMS modeling handoff for CoE
-  + Ingests modeling results (AAL, TVAR, Premium)
-  + Sends draft indication templates (Fast Track)
+UWALayer: {
+  label: "UWA Layer"
+  style.fill: "#e7f0f6"
+
+  UWA: "UWA Service Layer (GenAI)" {
+    shape: class
+    style.fill: "#fbc02d"
+    + Parses broker emails from submission inbox
+    + Extracts and classifies all submission documents
+    + Runs field extraction such as TIV, occupancy, locations
+    + Validates completeness of submission
+    + Triggers NGE reservation via API
+    + Tags incomplete submissions for SSC queue
+    + Tags Fast Track eligible deals
+    + Sends deal data to UWConsole for review
+    + Prepares GLMS modeling handoff for CoE
+    + Ingests modeling results such as AAL, TVAR, Premium
+    + Sends draft indication templates
+    eg, Fast Track
+  }
+
+  UWConsole: "UWA UW Console" {
+    shape: class
+    style.fill: "#8e24aa"
+    + Displays all active submissions to UW
+    + Flags follow-ups, incomplete, Fast Track
+    + Searchable by Insured, ID, Date, Broker
+    + Shows submission summary: TIV, Occupancy, Limit
+    + Renders inline SoV, Loss History, Risk scores
+    + Supports triggering indication or GLMS handoff
+  }
+
+  PrioritizationEngine: "UWA Prioritization Engine" {
+    shape: class
+    style.fill: "#f9a825"
+    + Scores submissions by completeness, follow-up, appetite, effective date
+    + Tags Fast Track based on rules
+    + Ranks deals in queue for UWConsole
+  }
 }
 
-UWConsole: "UWA UW Console" {
-  shape: class
-  style.fill: "#8e24aa"
-  + Displays all active submissions to UW
-  + Flags follow-ups, incomplete, Fast Track
-  + Searchable by Insured, ID, Date, Broker
-  + Shows submission summary: TIV, Occupancy, Limit
-  + Renders inline SoV, Loss History, Risk scores
-  + Supports triggering indication or GLMS handoff
-}
+UWALayer.UWA -> eStart: Submits reservation with extracted fields
+UWALayer.UWA -> WWIP: Pre-fills form (if API available)
+UWALayer.UWA -> UWALayer.PrioritizationEngine
+UWALayer.PrioritizationEngine -> UWALayer.UWConsole
+UWALayer.UWA -> UWALayer.UWConsole: Sends metadata, documents, risk flags
+UWALayer.UWA -> UserLayer.SharedServices: Queues low-confidence docs for HITL
+UWALayer.UWConsole -> UserLayer.Underwriter: Review and decisioning
+UWALayer.UWConsole -> UWALayer.UWA: Triggers GLMS handoff or broker indication
 
-PrioritizationEngine: "UWA Prioritization Engine" {
-  shape: class
-  style.fill: "#f9a825"
-  + Scores submissions by completeness, follow-up, appetite, effective date
-  + Tags Fast Track based on rules
-  + Ranks deals in queue for UWConsole
-}
-
-UWA -> eStart: Submits reservation with extracted fields
-UWA -> WWIP: Pre-fills form (if API available)
-UWA -> PrioritizationEngine
-PrioritizationEngine -> UWConsole
-UWA -> UWConsole: Sends metadata, documents, risk flags
-UWA -> UserLayer.SharedServices: Queues low-confidence docs for HITL
-UWConsole -> UserLayer.Underwriter: Review and decisioning
-UWConsole -> UWA: Triggers GLMS handoff or broker indication
-
-UWA -> ResearchLayer.Augmented.AutoImageRight: Pulls SoV, Loss Run for preview
-UWA -> ResearchLayer.Augmented.AutoGoogle: Retrieves aerial snip via Maps API
-UWA -> ResearchLayer.Augmented.AutoRiskMeter: Gets brush/wind/hail scores
-UWA -> ResearchLayer.Augmented.AutoValidus: Pulls ISO & crime ratings
-UWA -> ResearchLayer.Augmented.AutoSearch: Performs business info lookup
+UWALayer.UWA -> ResearchLayer.Augmented.AutoSearch: Performs business info lookup
