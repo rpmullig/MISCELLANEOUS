@@ -1,41 +1,12 @@
 direction: right
-grid-rows: 3
+grid-rows: 4
 
-# -------------------- ONTOLOGY / EMBEDDING LAYER --------------------
-OntologyLayer: {
+# -------------------- USER LAYER --------------------
+UserLayer: {
   direction: right
-  grid-columns: 4
-  style.fill: "#f3e5f5"
-
-  Textract: {
-    label: "AWS Textract\n(OCR)"
-    shape: rectangle
-    style.fill: "#f8bbd0"
-  }
-
-  Titan: {
-    label: "Titan Embedding\n(Vectorize)"
-    shape: rectangle
-    style.fill: "#f8bbd0"
-  }
-
-  Claude: {
-    label: "Claude LLM\n(Summarize, Synthesize)"
-    shape: rectangle
-    style.fill: "#f8bbd0"
-  }
-
-  VectorStore: {
-    label: "Ontology Vector Store"
-    shape: cylinder
-    style.fill: "#ce93d8"
-  }
-}
-
-# -------------------- PROCESS FLOW --------------------
-ProcessFlow: {
-  direction: right
-  style.fill: "#e0f7fa"
+  width: 5000
+  grid-rows: 1
+  horizontal-gap: 800
 
   BrokerActor: {
     label: "Broker"
@@ -60,148 +31,183 @@ ProcessFlow: {
     shape: person
     style.fill: "#b39ddb"
   }
+}
 
-  BrokerDocs: {
-    label: "Broker Submission\n(SoV, Loss Runs, etc)"
-    shape: document
-    style.fill: "#ffecb3"
+# -------------------- PROCESS FLOW --------------------
+Pipeline: {
+  direction: right
+  grid-columns: 4
+  style.fill: "#e0f7fa"
+
+  submission: {
+    # keep this, it's to not stretch borker documents
+    BrokerDocs: {
+      label: "Broker Submission\n(SoV, Loss Runs, etc)"
+      shape: document
+      style.fill: "#ffecb3"
+      style.multiple: true
+    }
+    style.fill: transparent
+    style.stroke: transparent
+    style.font-color: transparent
   }
 
   PreReservation: {
-    direction: right
+    label: "Pre-Reservation"
+    shape: rectangle
     style.fill: "#e6f0ff"
-
-    InboxSweep: {
-      label: "Inbox Sweep\n(ImageRight)"
-      style.fill: "#f2d9e6"
-    }
-
-    EmailPull: {
-      label: "Pull Emails & Attachments\n(UWA)"
-      style.fill: "#cce5ff"
-    }
-
-    DocClassification: {
-      label: "Classify Docs\n(UWA)"
-      style.fill: "#cce5ff"
-    }
-
-    FieldExtraction: {
-      label: "Field Extraction\n(UWA)"
-      style.fill: "#cce5ff"
-    }
-
-    ExternalEnrichment: {
-      label: "External Risk Enrichment"
-      style.fill: "#ccffe6"
-    }
-
-    GLMSDecisionCheck: {
-      label: "Check GLMS Need\n(TIV > \$30M or CAT)"
-      style.fill: "#f2ffe6"
-    }
-
-    LowConfidence: {
-      label: "Low Confidence Flag"
-      style.fill: "#ffccbc"
-    }
-
-    SSCReview: {
-      label: "Manual Review\n(SSC)"
-      style.fill: "#e1bee7"
-    }
-
-    NGEReservation: {
-      label: "NGE Reservation"
-      style.fill: "#ffe0b2"
-    }
-
-    WWIPPrefill: {
-      label: "WWIP Pre-Fill"
-      style.fill: "#ffffcc"
-    }
   }
 
   Reservation: {
-    direction: right
+    label: "Reservation"
+    shape: rectangle
     style.fill: "#fff9c4"
-
-    SSCValidation: {
-      label: "SSC Finalize Fields\nAssign UW"
-      style.fill: "#fff59d"
-    }
-
-    ReadyForUW: {
-      label: "Ready for UW\n(Trigger Task Queue)"
-      style.fill: "#fff176"
-    }
   }
 
   PostReservation: {
-    direction: right
+    label: "Post-Reservation"
+    shape: rectangle
     style.fill: "#e8f5e9"
+  }
+}
 
-    Prioritization: {
-      label: "Score & Prioritize\n(UWA Rules Engine)"
-      style.fill: "#c8e6c9"
-    }
+# Detailed steps for each process stage
+Pipeline.PreReservation: {
+  direction: right
+  style.fill: "#e6f0ff"
 
-    FastTrackCheck: {
-      label: "Fast Track Logic"
-      style.fill: "#aed581"
-    }
+  InboxSweep: {
+    label: "Inbox Sweep\n(ImageRight)"
+    style.fill: "#f2d9e6"
+  }
 
-    UWAConsole: {
-      label: "UWA Console View"
-      style.fill: "#a5d6a7"
-    }
+  EmailPull: {
+    label: "Pull Emails & Attachments\n(UWA)"
+    style.fill: "#cce5ff"
+  }
 
-    GLMSHandoff: {
-      label: "GLMS Handoff"
-      style.fill: "#dcedc8"
-    }
+  DocClassification: {
+    label: "Classify Docs\n(UWA)"
+    style.fill: "#cce5ff"
+  }
 
-    GLMSResults: {
-      label: "GLMS Results Ingest"
-      style.fill: "#f0f4c3"
-    }
+  FieldExtraction: {
+    label: "Field Extraction\n(UWA)"
+    style.fill: "#cce5ff"
+  }
 
-    WorksheetGen: {
-      label: "Generate Workup"
-      style.fill: "#e6ee9c"
-    }
+  ExternalEnrichment: {
+    label: "External Risk Enrichment"
+    style.fill: "#ccffe6"
+  }
 
-    FollowUpReingest: {
-      label: "Follow-up Reingestion"
-      style.fill: "#dce775"
-    }
+  GLMSDecisionCheck: {
+    label: "Check GLMS Need\n(TIV > \$30M or CAT)"
+    style.fill: "#f2ffe6"
+  }
 
-    UWReview: {
-      label: "Final UW Review & Quote"
-      style.fill: "#c5e1a5"
-    }
+  LowConfidence: {
+    label: "Low Confidence Flag"
+    style.fill: "#ffccbc"
+  }
 
-    isBind: {
-      label: "Bound?\nDecision"
-      style.fill: "#b2dfdb"
-    }
+  SSCReview: {
+    label: "Manual Review\n(SSC)"
+    style.fill: "#e1bee7"
+  }
 
-    iFeed: {
-      label: "Send to iFeed/GDW"
-      style.fill: "#80cbc4"
-    }
+  NGEReservation: {
+    label: "NGE Reservation"
+    style.fill: "#ffe0b2"
+  }
 
-    GDWLink: {
-      label: "Linked in GDW"
-      style.fill: "#4db6ac"
-    }
+  WWIPPrefill: {
+    label: "WWIP Pre-Fill"
+    style.fill: "#ffffcc"
+  }
+}
+
+Pipeline.Reservation: {
+  direction: right
+  style.fill: "#fff9c4"
+
+  SSCValidation: {
+    label: "SSC Finalize Fields\nAssign UW"
+    style.fill: "#fff59d"
+  }
+
+  ReadyForUW: {
+    label: "Ready for UW\n(Trigger Task Queue)"
+    style.fill: "#fff176"
+  }
+}
+
+Pipeline.PostReservation: {
+  direction: right
+  style.fill: "#e8f5e9"
+
+  Prioritization: {
+    label: "Score & Prioritize\n(UWA Rules Engine)"
+    style.fill: "#c8e6c9"
+  }
+
+  FastTrackCheck: {
+    label: "Fast Track Logic"
+    style.fill: "#aed581"
+  }
+
+  UWAConsole: {
+    label: "UWA Console View"
+    style.fill: "#a5d6a7"
+  }
+
+  GLMSHandoff: {
+    label: "GLMS Handoff"
+    style.fill: "#dcedc8"
+  }
+
+  GLMSResults: {
+    label: "GLMS Results Ingest"
+    style.fill: "#f0f4c3"
+  }
+
+  WorksheetGen: {
+    label: "Generate Workup"
+    style.fill: "#e6ee9c"
+  }
+
+  FollowUpReingest: {
+    label: "Follow-up Reingestion"
+    style.fill: "#dce775"
+  }
+
+  UWReview: {
+    label: "Final UW Review & Quote"
+    style.fill: "#c5e1a5"
+  }
+
+  isBind: {
+    label: "Bound?\nDecision"
+    style.fill: "#b2dfdb"
+  }
+
+  iFeed: {
+    label: "Send to iFeed/GDW"
+    style.fill: "#80cbc4"
+  }
+
+  GDWLink: {
+    label: "Linked in GDW"
+    style.fill: "#4db6ac"
   }
 }
 
 # -------------------- DATA LAYER --------------------
 DataLayer: {
   direction: right
-  grid-columns: 6
+  width: 5000
+  grid-rows: 1
+  horizontal-gap: 200
   style.fill: "#e3f2fd"
 
   GDMS: {
@@ -235,50 +241,129 @@ DataLayer: {
   }
 
   ExternalSources: {
-    label: "External APIs\n(Google, Yelp, DOL)"
+    label: "External APIs\n(Google, Yelp, OSHA)"
+    shape: cylinder
+    style.fill: "#b3e5fc"
+  }
+
+  IntelliRisk: {
+    label: "IntelliRisk\n(Loss Runs)"
+    shape: cylinder
+    style.fill: "#81d4fa"
+  }
+
+  CRUIS: {
+    label: "CRUIS\n(Claims History)"
+    shape: cylinder
+    style.fill: "#81d4fa"
+  }
+
+  NGE: {
+    label: "NGE\n(Reservation)"
+    shape: cylinder
+    style.fill: "#b3e5fc"
+  }
+
+  WWIP: {
+    label: "WWIP\n(Underwriting Workbench)"
+    shape: cylinder
+    style.fill: "#b3e5fc"
+  }
+
+  GLMS: {
+    label: "GLMS\n(Modeling)"
     shape: cylinder
     style.fill: "#b3e5fc"
   }
 }
 
-# -------------------- FLOWS (ALL ARROWS BELOW) --------------------
+# -------------------- ONTOLOGY / EMBEDDING LAYER --------------------
+OntologyLayer: {
+  direction: right
+  grid-columns: 4
+  horizontal-gap: 200
+  style.fill: "#f3e5f5"
 
-ProcessFlow.BrokerActor -> ProcessFlow.BrokerDocs: "Submit Docs"
-ProcessFlow.BrokerDocs -> ProcessFlow.PreReservation.InboxSweep: "Broker sends email"
-ProcessFlow.PreReservation.InboxSweep -> ProcessFlow.PreReservation.EmailPull: "Trigger sweep"
-ProcessFlow.PreReservation.EmailPull -> ProcessFlow.PreReservation.DocClassification: "Parse attachments"
-ProcessFlow.PreReservation.DocClassification -> ProcessFlow.PreReservation.FieldExtraction: "Classify"
-OntologyLayer.VectorStore -> ProcessFlow.PreReservation.FieldExtraction: "Enriched Field Match"
-ProcessFlow.PreReservation.FieldExtraction -> ProcessFlow.PreReservation.ExternalEnrichment: "Enrich"
-DataLayer.ExternalSources -> ProcessFlow.PreReservation.ExternalEnrichment: "Query API"
-ProcessFlow.PreReservation.ExternalEnrichment -> ProcessFlow.PreReservation.GLMSDecisionCheck: "Pass augmented fields"
-ProcessFlow.PreReservation.GLMSDecisionCheck -> ProcessFlow.PreReservation.LowConfidence: "If low confidence"
-ProcessFlow.PreReservation.LowConfidence -> ProcessFlow.PreReservation.SSCReview: "Manual review"
-ProcessFlow.PreReservation.GLMSDecisionCheck -> ProcessFlow.PreReservation.NGEReservation: "Valid submission"
-DataLayer.MDM -> ProcessFlow.PreReservation.NGEReservation: "Account Lookup"
-DataLayer.RDM -> ProcessFlow.PreReservation.NGEReservation: "PUC Map"
-DataLayer.NGPLS -> ProcessFlow.PreReservation.NGEReservation: "Producer Validation"
-DataLayer.GDMS -> ProcessFlow.PreReservation.EmailPull: "Source documents"
-ProcessFlow.PreReservation.NGEReservation -> ProcessFlow.PreReservation.WWIPPrefill: "To WWIP"
-ProcessFlow.PreReservation.WWIPPrefill -> ProcessFlow.Reservation.SSCValidation: "Send to SSC"
-ProcessFlow.Reservation.SSCValidation -> ProcessFlow.Reservation.ReadyForUW: "Ready for UW"
-ProcessFlow.Reservation.ReadyForUW -> ProcessFlow.PostReservation.Prioritization: "Score trigger"
-ProcessFlow.PostReservation.Prioritization -> ProcessFlow.PostReservation.FastTrackCheck: "Evaluate"
-ProcessFlow.PostReservation.FastTrackCheck -> ProcessFlow.PostReservation.UWAConsole: "Display queue"
-ProcessFlow.PostReservation.UWAConsole -> ProcessFlow.PostReservation.GLMSHandoff: "Trigger if CAT"
-ProcessFlow.PostReservation.GLMSHandoff -> ProcessFlow.PostReservation.GLMSResults: "Return results"
-ProcessFlow.PostReservation.GLMSResults -> ProcessFlow.PostReservation.WorksheetGen: "Generate worksheet"
-ProcessFlow.PostReservation.UWAConsole -> ProcessFlow.PostReservation.FollowUpReingest: "Capture follow-up"
-ProcessFlow.PostReservation.FollowUpReingest -> ProcessFlow.PreReservation.FieldExtraction: "Rerun"
-ProcessFlow.PostReservation.UWAConsole -> ProcessFlow.PostReservation.UWReview: "Manual review"
-ProcessFlow.PostReservation.UWReview -> ProcessFlow.PostReservation.isBind: "Decision"
-ProcessFlow.PostReservation.isBind -> ProcessFlow.PostReservation.iFeed: "Push to iFeed"
-ProcessFlow.PostReservation.iFeed -> ProcessFlow.PostReservation.GDWLink: "Log to GDW"
-ProcessFlow.PostReservation.GDWLink -> DataLayer.GDW: "Store Record"
+  Textract: {
+    label: "AWS Textract\n(OCR)"
+    shape: rectangle
+    style.fill: "#f8bbd0"
+  }
 
-ProcessFlow.SSActor -> ProcessFlow.PreReservation.SSCReview: "SSC assigned"
-ProcessFlow.SSActor -> ProcessFlow.Reservation.SSCValidation: "SSC validates"
-ProcessFlow.UWActor -> ProcessFlow.PostReservation.UWAConsole: "UW accesses queue"
-ProcessFlow.UWActor -> ProcessFlow.PostReservation.UWReview: "Final review"
-ProcessFlow.UWActor -> ProcessFlow.PostReservation.GLMSHandoff: "Start modeling"
-ProcessFlow.COEActor -> ProcessFlow.PostReservation.GLMSResults: "Send output"
+  Titan: {
+    label: "Titan Embedding\n(Vectorize)"
+    shape: rectangle
+    style.fill: "#f8bbd0"
+  }
+
+  Claude: {
+    label: "Claude LLM\n(Summarize, Synthesize)"
+    shape: rectangle
+    style.fill: "#f8bbd0"
+  }
+
+  VectorStore: {
+    label: "Ontology Vector Store"
+    shape: cylinder
+    style.fill: "#ce93d8"
+  }
+
+  # Internal Ontology flows
+  Textract -> Titan: "OCR text"
+  Titan -> Claude: "Vectorize text"
+  Claude -> VectorStore: "Store embeddings"
+}
+
+# -------------------- FLOWS --------------------
+UserLayer.BrokerActor -> Pipeline.submission.BrokerDocs: "Submit Docs"
+Pipeline.submission.BrokerDocs -> Pipeline.PreReservation.InboxSweep: "Broker sends email"
+
+Pipeline.PreReservation.InboxSweep -> Pipeline.PreReservation.EmailPull: "Trigger sweep"
+Pipeline.PreReservation.EmailPull -> Pipeline.PreReservation.DocClassification: "Parse attachments"
+Pipeline.PreReservation.DocClassification -> Pipeline.PreReservation.FieldExtraction: "Classify & Extract"
+OntologyLayer.VectorStore -> Pipeline.PreReservation.FieldExtraction: "Enriched Field Match"
+Pipeline.PreReservation.FieldExtraction -> Pipeline.PreReservation.ExternalEnrichment: "Enrich"
+
+DataLayer.ExternalSources -> Pipeline.PreReservation.ExternalEnrichment: "Query general APIs"
+Pipeline.PreReservation.ExternalEnrichment -> DataLayer.IntelliRisk: "Fetch loss runs"
+Pipeline.PreReservation.ExternalEnrichment -> DataLayer.CRUIS: "Fetch claims history"
+Pipeline.PreReservation.ExternalEnrichment -> Pipeline.PreReservation.GLMSDecisionCheck: "Pass augmented fields"
+
+Pipeline.PreReservation.GLMSDecisionCheck -> Pipeline.PreReservation.LowConfidence: "If low confidence"
+Pipeline.PreReservation.LowConfidence -> Pipeline.PreReservation.SSCReview: "Manual review"
+Pipeline.PreReservation.GLMSDecisionCheck -> Pipeline.PreReservation.NGEReservation: "Valid submission"
+
+Pipeline.PreReservation.NGEReservation -> DataLayer.NGE: "Submit reservation"
+DataLayer.NGE -> Pipeline.PreReservation.WWIPPrefill: "Return clearance status"
+Pipeline.PreReservation.WWIPPrefill -> DataLayer.WWIP: "Create & pre-fill record"
+DataLayer.WWIP -> Pipeline.Reservation.SSCValidation: "Draft status"
+
+Pipeline.PreReservation.WWIPPrefill -> Pipeline.Reservation.SSCValidation: "Send to SSC"
+Pipeline.Reservation.SSCValidation -> Pipeline.Reservation.ReadyForUW: "Ready for UW"
+Pipeline.Reservation.ReadyForUW -> Pipeline.PostReservation.Prioritization: "Score trigger"
+
+Pipeline.PostReservation.Prioritization -> Pipeline.PostReservation.FastTrackCheck: "Evaluate"
+Pipeline.PostReservation.FastTrackCheck -> Pipeline.PostReservation.UWAConsole: "Display queue"
+
+Pipeline.PostReservation.UWAConsole -> Pipeline.PostReservation.GLMSHandoff: "Trigger if modeling needed"
+Pipeline.PostReservation.GLMSHandoff -> DataLayer.GLMS: "Send model request"
+DataLayer.GLMS -> Pipeline.PostReservation.GLMSResults: "Return model output"
+Pipeline.PostReservation.GLMSResults -> DataLayer.WWIP: "Update rating inputs"
+
+Pipeline.PostReservation.UWAConsole -> Pipeline.PostReservation.FollowUpReingest: "Capture follow-up"
+DataLayer.GDMS -> Pipeline.PostReservation.FollowUpReingest: "Follow-up docs"
+Pipeline.PostReservation.FollowUpReingest -> Pipeline.PreReservation.FieldExtraction: "Reprocess docs"
+
+Pipeline.PostReservation.UWAConsole -> Pipeline.PostReservation.UWReview: "Manual review"
+Pipeline.PostReservation.UWReview -> Pipeline.PostReservation.isBind: "Decision"
+Pipeline.PostReservation.isBind -> Pipeline.PostReservation.iFeed: "Push to iFeed"
+Pipeline.PostReservation.iFeed -> Pipeline.PostReservation.GDWLink: "Log to GDW"
+Pipeline.PostReservation.GDWLink -> DataLayer.GDW: "Store record"
+
+# User interactions again
+UserLayer.SSActor -> Pipeline.PreReservation.SSCReview: "SSC assigned"
+UserLayer.SSActor -> Pipeline.Reservation.SSCValidation: "SSC validates"
+UserLayer.UWActor -> Pipeline.PostReservation.UWAConsole: "UW accesses queue"
+UserLayer.UWActor -> Pipeline.PostReservation.UWReview: "Final review"
+UserLayer.UWActor -> Pipeline.PostReservation.GLMSHandoff: "Initiate modeling"
+UserLayer.COEActor -> Pipeline.PostReservation.GLMSResults: "Return results"
