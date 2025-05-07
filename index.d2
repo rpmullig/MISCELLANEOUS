@@ -1,364 +1,266 @@
-# ---------- USER LAYER ----------
+direction: right
+grid-rows: 3
 
+# -------------------- USER LAYER --------------------
 UserLayer: {
-  label: "User Layer"
+  direction: right
   style.fill: "#f3e5f5"
+  grid-rows: 1
 
-  Broker: "Broker" {
-    shape: class
-    style.fill: "#9575cd"
-    + Sends initial submission emails
-    + Provides attachments (SOVs, Loss Runs, Rent Rolls, BORs)
-    + Responds to UW and SSC document requests
+  Broker: {
+    label: "Broker"
+    shape: person
+    style.fill: "#d1c4e9"
   }
 
-  SharedServices: "Shared Services (SSC)" {
-    shape: class
-    style.fill: "#9575cd"
-    + Retrieves tasks from ImageRight queue
-    + Reads parsed email and documents
-    + Manually copies IDs into WWIP and eStart
-    + Reserves in eStart (clearance check)
-    + Creates WWIP submission and updates IDs
-    + Links ImageRight Drawer to WWIP ID
+  SSC: {
+    label: "SSC"
+    shape: person
+    style.fill: "#d1c4e9"
   }
 
-  Underwriter: "Underwriter (UW)" {
-    shape: class
-    style.fill: "#9575cd"
-    + Reviews structured submission docs
-    + Requests additional documents from broker
-    + Reviews broker follow-up uploads
-    + Conducts research via embedded and manual tools
-    + Decides on modeling (WWIP or GLMS)
-    + Sends GLMS work request or email to COE with SOV
-    + Interacts with GLMS scenarios: selects coverages, fills fields
-    + Finalizes quotes, binds account
+  UW: {
+    label: "UW"
+    shape: person
+    style.fill: "#d1c4e9"
   }
 
-  COE: "Center of Excellence (COE)" {
-    shape: class
-    style.fill: "#9575cd"
-    + Receives SOV and work request from UW (email or GLMS portal)
-    + Runs Jarvis Excel pipeline to clean/parse locations
-    + Uploads cleaned locations into GLMS
-    + Supports building GLMS scenarios, layers, perils
-    + Returns TVAR/AAL outputs to UW for pricing
+  COE: {
+    label: "CoE"
+    shape: person
+    style.fill: "#d1c4e9"
   }
 }
 
-# ---------- SERVICES ----------
+# -------------------- PROCESS LAYER --------------------
+ProcessFlow: {
+  grid-columns: 3
+  direction: right
+  style.fill: "#e6f0ff"
 
-ImageRight: "ImageRight (Email Intake + Doc Mgmt)" {
-  shape: class
-  style.fill: "#4dd0e1"
-  + Sweeps submission emails (Standard, VIP, Rush)
-  + Parses email + attachments into viewer pages
-  + Creates temp drawer and temporary ID
-  + Queues task for SSC review
-  + SSC overwrites Drawer ID with WWIP Policy ID
-  + Accessible via WWIP URL lookup
-  + Accepts doc push from WWIP via Linker\.exe
-}
+  PreReservation: {
+    direction: right
+    style.fill: "#e6f0ff"
 
-eStart: "eStart / NGE Reservation" {
-  shape: class
-  style.fill: "#ffb74d"
-  + Accepts reservation data from SSC
-  + Performs duplicate, sanction, block clearance
-  + Creates eStart ID and clearance status
-  + Allows shell account creation if missing
-}
-
-WWIP: "WWIP Platform (Submission & Quote Management)" {
-  shape: class
-  style.fill: "#64b5f6"
-  + Creates WWIP submission ID (Policy Number)
-  + Accepts eStart ID and clearance update
-  + Tracks statuses: Reserved, Blocked, Solicited, Renewed
-  + Stores UW Notes, Referrals, Forms, Binders
-  + Runs embedded Google Geocoder
-  + Integrates Validus risk scoring
-  + Retrieves ISO class via Clarion Door
-  + Manages worksheet module for pricing
-  + Pushes generated documents to ImageRight via Linker\.exe
-  + URL links ImageRight Drawer to WWIP Policy ID
-}
-
-GLMS: "GLMS (Modeling Platform)" {
-  shape: class
-  style.fill: "#7b9f35"
-  + Accepts SOVs and scenarios
-  + Exports CAT files to Lynx via file transfer
-  + Receives merged CAT result back
-  + Sends final data to GLMS Toolchain
-}
-
-# ---------- RESEARCH LAYER ----------
-
-ResearchLayer: {
-  label: "Research Layer"
-  style.fill: "#ede7f6"
-
-  Embedded: {
-    label: "Embedded/Internal Research and Tools"
-    style.fill: "#f0f4c3"
-
-    Validus: "Validus Risk Services" {
-      shape: class
-      style.fill: "#81c784"
-      + Provides ISO, Crime, Brush, DTC scoring
+    InboxSweep: {
+      label: "Inbox Sweep\n(System: ImageRight)"
+      style.fill: "#f2d9e6"
     }
 
-    WWIPGeocoder: "WWIP Embedded Googles Maps" {
-      shape: class
-      style.fill: "#81c784"
-      + Geocodes addresses to lat/long
+    EmailPull: {
+      label: "Email & Docs Pulled\n(System: UWA)"
+      style.fill: "#cce5ff"
     }
 
-    ClarionDoor: "Clarion Door (ISO Rating)" {
-      shape: class
-      style.fill: "#81c784"
-      + Returns Protection Class and ISO Symbol
+    DocClassification: {
+      label: "Doc Classification\n(System: UWA)"
+      style.fill: "#cce5ff"
     }
 
-    PlacelyGeo: "Placely Geoservices" {
-      shape: class
-      style.fill: "#f48fb1"
-      + Rooftop match validation
+    FieldExtraction: {
+      label: "Field Extraction\n(System: UWA)"
+      style.fill: "#cce5ff"
     }
 
-    Lynx: "Lynx CAT Integration (File-Based)" {
-      shape: class
-      style.fill: "#f48fb1"
-      + Accepts CAT scenario files from GLMS
-      + Routes files to RMS, AIR, and Validus CAT models
-      + Merges outputs and sends results back to GLMS
+    ExternalEnrichment: {
+      label: "External Risk Enrichment\n(Google, SpotCrime, Yelp)"
+      style.fill: "#ccffe6"
     }
 
-    RMS: "RMS CAT Model" {
-      shape: class
-      style.fill: "#f48fb1"
-    }
-    AIR: "AIR CAT Model" {
-      shape: class
-      style.fill: "#f48fb1"
-    }
-    ValidusCAT: "Validus CAT Model" {
-      shape: class
-      style.fill: "#f48fb1"
+    GLMSDecisionCheck: {
+      label: "Check if GLMS Needed\n(TIV > \$30M or CAT)"
+      style.fill: "#f2ffe6"
     }
 
-    GLMSToolchain: "GLMS Toolchain (Scenario Processing)" {
-      shape: class
-      style.fill: "#f48fb1"
-      + Post-merge CAT scenario handling
-      + Final rating engine
-      + Sends to AIG Rater (HX)
+    LowConfidence: {
+      label: "Low Confidence Flag\n(System: UWA)"
+      style.fill: "#cce5ff"
     }
 
-    AIGRater: "AIG Rater (HX Service)" {
-      shape: class
-      style.fill: "#f48fb1"
-      + Returns Technical Premium for quote
+    SSCReview: {
+      label: "SSC Manual Review\n(System: SSC)"
+      style.fill: "#e6ccff"
     }
 
-    UWGuidelines: "UW Guidelines (OneNote)" {
-      shape: class
-      style.fill: "#81c784"
-      + Manual judgment playbook for underwriters
+    NGEReservation: {
+      label: "NGE Reservation & Clearance\n(System: NGE)"
+      style.fill: "#ffe6cc"
+    }
+
+    WWIPPrefill: {
+      label: "WWIP Pre-Fill\n(System: WWIP)"
+      style.fill: "#ffffcc"
     }
   }
 
-  Manual: {
-    label: "Manual External Research"
-    style.fill: "#ede7f6"
+  Reservation: {
+    direction: right
+    style.fill: "#f9f5d7"
 
-    GoogleMaps: "Google Maps (Visual Inspection)" {
-      shape: class
-      style.fill: "#aed581"
-      + Manual aerial and neighborhood inspection
+    SSCValidation: {
+      label: "SSC Assignment & Finalization\n(System: WWIP)"
+      style.fill: "#ffffcc"
     }
 
-    CrimeSpot: "CrimeSpot (Crime Heatmaps)" {
-      shape: class
-      style.fill: "#aed581"
-      + Manual crime lookup tool
-    }
-
-    RiskMeter: "RiskMeter (Brush/Wind Risk)" {
-      shape: class
-      style.fill: "#aed581"
-      + Manual wildfire/windstorm validation
-    }
-
-    NewsWeb: "Public Search (News/Yelp)" {
-      shape: class
-      style.fill: "#aed581"
-      + Lawsuit search, reputation validation
+    ReadyForUW: {
+      label: "Status: Ready for UW\n(System: WWIP)"
+      style.fill: "#ffffcc"
     }
   }
 
-  Augmented: {
-    label: "Augmented Research (via UWA)"
-    style.fill: "#90caf9"
+  PostReservation: {
+    direction: right
+    style.fill: "#e8fce8"
 
-    AutoSearch: "Google News and Search" {
-      shape: class
-      style.fill: "#42a5f5"
-      + Searches business presence, news, etc
+    Prioritization: {
+      label: "Submission Prioritization\n(System: UWA)"
+      style.fill: "#cce5ff"
+    }
+
+    FastTrackCheck: {
+      label: "Fast Track Eligibility\n(System: UWA)"
+      style.fill: "#cce5ff"
+    }
+
+    UWAConsole: {
+      label: "UWA Console\n(System: UWA)"
+      style.fill: "#cce5ff"
+    }
+
+    GLMSHandoff: {
+      label: "GLMS Handoff\n(System: GLMS)"
+      style.fill: "#d9f2d9"
+    }
+
+    GLMSResults: {
+      label: "GLMS Results → WWIP\n(System: WWIP)"
+      style.fill: "#ffffcc"
+    }
+
+    WorksheetGen: {
+      label: "Worksheet Auto-Generated\n(System: UWA)"
+      style.fill: "#cce5ff"
+    }
+
+    FollowUpReingest: {
+      label: "Re-Ingest Follow-ups\n(System: UWA)"
+      style.fill: "#cce5ff"
+    }
+
+    UWReview: {
+      label: "UW Final Review & Quote\n(System: WWIP)"
+      style.fill: "#cce5ff"
     }
   }
 }
 
-# ---------- DATA LAYER ----------
-
+# -------------------- DATA LAYER --------------------
 DataLayer: {
-  label: "Data Layer"
-  style.fill: "#e8f5e9"
+  direction: right
+  style.fill: "#d9e8fb"
+  grid-rows: 1
 
-  ImageRightDB: "ImageRight Archive" {
-    shape: class
-    style.fill: "#4fc3f7"
-    - Stores broker submissions, parsed files
-    - Tied to WWIP ID
-    - Archives binders, quote docs, UW notes
+  OntologyLayer: {
+    label: "Ontology Layer\n(Palantir AIP / Foundry)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
   }
 
-  WWIPDB: "WWIP SQL Database" {
-    shape: class
-    style.fill: "#4fc3f7"
-    - Submission lifecycle tracking
-    - Quote docs, referral notes, attachments
-    - Record of modeling and doc link actions
+  GDMS: {
+    label: "GDMS\n(Document Repository)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
   }
 
-  GDMS: "GDMS (Modeling Archive)" {
-    shape: class
-    style.fill: "#4fc3f7"
-    - Archives SOVs, scenario exports
-    - Stores CAT merged outputs
+  MDM: {
+    label: "MDM\n(Master Data Mgmt)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
   }
 
-  GDW: "GDW (Post-bind System of Record)" {
-    shape: class
-    style.fill: "#4fc3f7"
-    - Receives final price from iFeed
-    - Source of truth for bound records
-  }
-}
-
-UWA: "UWA Service Layer (GenAI)" {
-  shape: class
-  style.fill: "#fbc02d"
-  + Ingests broker submission from ImageRight
-  + Extracts key fields and coverage indicators
-  + Flags modeling path as GLMS or WWIP
-  + Tags submission with bind propensity
-  + Pushes structured data to WWIP
-}
-
-# ---------- UWA FLOWS ----------
-ImageRight -> UWA: Sends parsed docs for ingestion
-UWA -> WWIP: Pushes extracted fields + prioritization tags
-UWA -> UserLayer.SharedServices: Pre-fills WWIP reservation form (SSC verifies)
-
-# ---------- FLOW (Explicit Human Actions) ----------
-
-UserLayer.Broker -> ImageRight: Submits email and attachments
-ImageRight -> UserLayer.SharedServices: Parses emails + queues tasks
-UserLayer.SharedServices -> WWIP: Creates WWIP ID / Policy record
-UserLayer.SharedServices -> eStart: Runs block check, creates eStart ID
-eStart -> WWIP: Updates clearance status
-UserLayer.SharedServices -> ImageRight: Overwrites temp drawer ID with WWIP Policy ID
-
-WWIP -> UserLayer.SharedServices: Enables UW assignment
-WWIP -> UserLayer.Underwriter: Sends UW alert + link to ImageRight drawer
-
-UserLayer.Underwriter -> ImageRight: Reviews parsed docs (SOV, Loss Runs)
-WWIP -> ResearchLayer.Embedded.WWIPGeocoder: Geocodes address
-ResearchLayer.Embedded.WWIPGeocoder -> ResearchLayer.Embedded.Validus: Populates risk scores
-WWIP -> ResearchLayer.Embedded.Validus: Receives risk data
-
-UserLayer.Underwriter -> UserLayer.COE: Sends SOV and modeling work request
-UserLayer.COE -> GLMS: Uploads scrubbed SOV + prepares scenarios
-UserLayer.Underwriter -> GLMS: Selects coverages, builds scenarios
-
-GLMS -> ResearchLayer.Embedded.Lynx: Submits scenario file
-ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.RMS
-ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.AIR
-ResearchLayer.Embedded.Lynx -> ResearchLayer.Embedded.ValidusCAT
-ResearchLayer.Embedded.Lynx -> GLMS: Returns merged CAT output
-
-GLMS -> ResearchLayer.Embedded.GLMSToolchain: Scenario processed
-ResearchLayer.Embedded.GLMSToolchain -> ResearchLayer.Embedded.AIGRater: Final rating
-ResearchLayer.Embedded.AIGRater -> UserLayer.Underwriter: Returns Technical Premium
-
-GLMS -> ResearchLayer.Embedded.PlacelyGeo: Validates rooftop accuracy
-
-UserLayer.Underwriter -> ResearchLayer.Manual.GoogleMaps: Conducts aerial review
-UserLayer.Underwriter -> ResearchLayer.Manual.CrimeSpot: Manually checks crime area
-UserLayer.Underwriter -> ResearchLayer.Manual.RiskMeter: Compares wildfire scores
-UserLayer.Underwriter -> ResearchLayer.Manual.NewsWeb: Conducts public risk search
-UserLayer.Underwriter -> ResearchLayer.Embedded.UWGuidelines: Consults underwriting rules
-
-UserLayer.Underwriter -> WWIP: Finalizes quoting / binder generation
-WWIP -> ResearchLayer.Embedded.ClarionDoor: Fetches ISO class data
-WWIP -> DataLayer.WWIPDB: Saves final submission status and quote docs
-WWIP -> DataLayer.ImageRightDB: Pushes binder via Linker\.exe
-GLMS -> DataLayer.GDMS: Archives CAT scenarios
-WWIP -> DataLayer.GDW: Sends bound price via iFeed
-
-ImageRight -> DataLayer.ImageRightDB: Stores broker email and docs
-
-UWALayer: {
-  label: "UWA Layer"
-  style.fill: "#e7f0f6"
-
-  UWA: "UWA Service Layer (GenAI)" {
-    shape: class
-    style.fill: "#fbc02d"
-    + Parses broker emails from submission inbox
-    + Extracts and classifies all submission documents
-    + Runs field extraction such as TIV, occupancy, locations
-    + Validates completeness of submission
-    + Triggers NGE reservation via API
-    + Tags incomplete submissions for SSC queue
-    + Tags Fast Track eligible deals
-    + Sends deal data to UWConsole for review
-    + Prepares GLMS modeling handoff for CoE
-    + Ingests modeling results such as AAL, TVAR, Premium
-    + Sends draft indication templates
-    eg, Fast Track
+  RDM: {
+    label: "RDM\n(Reference Data Mgmt)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
   }
 
-  UWConsole: "UWA UW Console" {
-    shape: class
-    style.fill: "#8e24aa"
-    + Displays all active submissions to UW
-    + Flags follow-ups, incomplete, Fast Track
-    + Searchable by Insured, ID, Date, Broker
-    + Shows submission summary: TIV, Occupancy, Limit
-    + Renders inline SoV, Loss History, Risk scores
-    + Supports triggering indication or GLMS handoff
+  NGPLS: {
+    label: "NGPLS\n(Producer Licensing)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
   }
 
-  PrioritizationEngine: "UWA Prioritization Engine" {
-    shape: class
-    style.fill: "#f9a825"
-    + Scores submissions by completeness, follow-up, appetite, effective date
-    + Tags Fast Track based on rules
-    + Ranks deals in queue for UWConsole
+  GDW: {
+    label: "GDW\n(Global Data Warehouse)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
+  }
+
+  ExternalSources: {
+    label: "External Data APIs\n(Google, DOL, Pitchbook, SpotCrime)"
+    shape: cylinder
+    style.fill: "#fbe9e7"
+  }
+
+  Textract: {
+    label: "AWS Textract\n(OCR from Docs)"
+    shape: rectangle
+    style.fill: "#fbe9e7"
+  }
+
+  Titan: {
+    label: "Titan Embedding\n(Vector Generation)"
+    shape: rectangle
+    style.fill: "#fbe9e7"
+  }
+
+  Claude: {
+    label: "Claude LLM\n(Synthesis & Q/A)"
+    shape: rectangle
+    style.fill: "#fbe9e7"
   }
 }
 
-UWALayer.UWA -> eStart: Submits reservation with extracted fields
-UWALayer.UWA -> WWIP: Pre-fills form (if API available)
-UWALayer.UWA -> UWALayer.PrioritizationEngine
-UWALayer.PrioritizationEngine -> UWALayer.UWConsole
-UWALayer.UWA -> UWALayer.UWConsole: Sends metadata, documents, risk flags
-UWALayer.UWA -> UserLayer.SharedServices: Queues low-confidence docs for HITL
-UWALayer.UWConsole -> UserLayer.Underwriter: Review and decisioning
-UWALayer.UWConsole -> UWALayer.UWA: Triggers GLMS handoff or broker indication
+# -------------------- ARROWS with ACTIONS --------------------
+# DataLayer Integration
+DataLayer.Textract -> DataLayer.Titan: "Extract → Embed"
+DataLayer.Titan -> DataLayer.Claude: "Embed → Summarize"
+DataLayer.Claude -> DataLayer.OntologyLayer: "Store in Ontology"
+DataLayer.GDMS -> ProcessFlow.PreReservation.EmailPull: "Send parsed docs"
+DataLayer.MDM -> ProcessFlow.PreReservation.NGEReservation: "Send D&B Match"
+DataLayer.RDM -> ProcessFlow.PreReservation.NGEReservation: "PUC Mapping"
+DataLayer.NGPLS -> ProcessFlow.PreReservation.NGEReservation: "Validate Producer"
+DataLayer.GDW -> ProcessFlow.PostReservation.GLMSResults: "Pull Prior Bound Info"
+DataLayer.ExternalSources -> ProcessFlow.PreReservation.ExternalEnrichment: "Augment with External Data"
+DataLayer.OntologyLayer -> ProcessFlow.PreReservation.FieldExtraction: "Return Enriched Fields"
 
-UWALayer.UWA -> ResearchLayer.Augmented.AutoSearch: Performs business info lookup
+# Process Layer Flow
+ProcessFlow.PreReservation.InboxSweep -> ProcessFlow.PreReservation.EmailPull: "Trigger on broker email"
+ProcessFlow.PreReservation.EmailPull -> ProcessFlow.PreReservation.DocClassification: "Extract attachments"
+ProcessFlow.PreReservation.DocClassification -> ProcessFlow.PreReservation.FieldExtraction: "Classify and pass to GenAI"
+ProcessFlow.PreReservation.FieldExtraction -> ProcessFlow.PreReservation.ExternalEnrichment: "Field output → Enrichment"
+ProcessFlow.PreReservation.ExternalEnrichment -> ProcessFlow.PreReservation.GLMSDecisionCheck: "TIV/Peril Assessment"
+ProcessFlow.PreReservation.GLMSDecisionCheck -> ProcessFlow.PreReservation.LowConfidence: "If confidence < threshold"
+ProcessFlow.PreReservation.LowConfidence -> ProcessFlow.PreReservation.SSCReview: "Send to SSC Queue"
+ProcessFlow.PreReservation.GLMSDecisionCheck -> ProcessFlow.PreReservation.NGEReservation: "If confidence high"
+ProcessFlow.PreReservation.NGEReservation -> ProcessFlow.PreReservation.WWIPPrefill: "Submit to WWIP"
+ProcessFlow.PreReservation.WWIPPrefill -> ProcessFlow.Reservation.SSCValidation: "Kick off SSC review"
+ProcessFlow.Reservation.SSCValidation -> ProcessFlow.Reservation.ReadyForUW: "Assign UW"
+ProcessFlow.Reservation.ReadyForUW -> ProcessFlow.PostReservation.Prioritization: "Trigger prioritization"
+ProcessFlow.PostReservation.Prioritization -> ProcessFlow.PostReservation.FastTrackCheck: "Score + Eligibility Check"
+ProcessFlow.PostReservation.FastTrackCheck -> ProcessFlow.PostReservation.UWAConsole: "Display in Console"
+ProcessFlow.PostReservation.UWAConsole -> ProcessFlow.PostReservation.GLMSHandoff: "Trigger if TIV > \$30M or CAT"
+ProcessFlow.PostReservation.GLMSHandoff -> ProcessFlow.PostReservation.GLMSResults: "Push to GLMS API"
+ProcessFlow.PostReservation.GLMSResults -> ProcessFlow.PostReservation.WorksheetGen: "Auto-fill Worksheet"
+ProcessFlow.PostReservation.UWAConsole -> ProcessFlow.PostReservation.FollowUpReingest: "Capture Follow-up"
+ProcessFlow.PostReservation.FollowUpReingest -> ProcessFlow.PreReservation.FieldExtraction: "Re-run Extraction"
+ProcessFlow.PostReservation.UWAConsole -> ProcessFlow.PostReservation.UWReview: "Manual UW Final Review"
+
+# User Flow Arrows
+UserLayer.Broker -> ProcessFlow.PreReservation.InboxSweep: "Send Submission Email"
+UserLayer.SSC -> ProcessFlow.PreReservation.SSCReview: "Review Low-Confidence Case"
+UserLayer.SSC -> ProcessFlow.Reservation.SSCValidation: "Finalize Fields in WWIP"
+UserLayer.UW -> ProcessFlow.PostReservation.UWAConsole: "Open Task Console"
+UserLayer.UW -> ProcessFlow.PostReservation.UWReview: "Finalize Indication & Quote"
+UserLayer.UW -> ProcessFlow.PostReservation.GLMSHandoff: "Initiate GLMS Request"
+UserLayer.COE -> ProcessFlow.PostReservation.GLMSResults: "Upload Results to WWIP"
